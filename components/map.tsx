@@ -1,19 +1,22 @@
+/// <reference types="@types/google.maps" />
 "use client";
 
 import { useEffect, useRef } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 
+type Event = {
+  name: string;
+  venue: string;
+  address: string;
+  city: string;
+  state: string;
+  time: string;
+};
+
 interface MapProps {
   city: string;
   country: string;
-  events: {
-    name: string;
-    venue: string;
-    address: string;
-    city: string;
-    state: string;
-    time: string;
-  }[];
+  events: Event[];
 }
 
 export function Map({ city, country, events }: MapProps) {
@@ -26,42 +29,54 @@ export function Map({ city, country, events }: MapProps) {
         version: "weekly",
       });
 
-      const { Map } = await loader.importLibrary("maps");
-      const { Geocoder } = await loader.importLibrary("geocoding");
+      const { Map: GoogleMap } = (await loader.importLibrary("maps")) as {
+        Map: typeof google.maps.Map;
+      };
+      const { Geocoder } = (await loader.importLibrary("geocoding")) as {
+        Geocoder: typeof google.maps.Geocoder;
+      };
 
       const geocoder = new Geocoder();
 
-      // First set the map center to the main city
       geocoder.geocode(
         { address: `${city}, ${country}` },
-        async (results, status) => {
+        async (
+          results: google.maps.GeocoderResult[] | null,
+          status: google.maps.GeocoderStatus
+        ) => {
           if (status === "OK" && results && results[0]) {
-            const map = new Map(mapRef.current as HTMLElement, {
+            const map = new GoogleMap(mapRef.current as HTMLElement, {
               center: results[0].geometry.location,
               zoom: 13,
             });
 
-            // Now geocode and add markers for each event
             for (const event of events) {
               const address = `${event.address}, ${event.city}, ${event.state}`;
 
               try {
-                const response = await new Promise((resolve, reject) => {
-                  geocoder.geocode({ address }, (results, status) => {
-                    if (status === "OK" && results && results[0]) {
-                      resolve(results[0]);
-                    } else {
-                      reject(status);
-                    }
-                  });
-                });
+                const response = await new Promise<google.maps.GeocoderResult>(
+                  (resolve, reject) => {
+                    geocoder.geocode(
+                      { address },
+                      (
+                        results: google.maps.GeocoderResult[] | null,
+                        status: google.maps.GeocoderStatus
+                      ) => {
+                        if (status === "OK" && results && results[0]) {
+                          resolve(results[0]);
+                        } else {
+                          reject(status);
+                        }
+                      }
+                    );
+                  }
+                );
 
                 const marker = new google.maps.Marker({
-                  map: map,
+                  map,
                   position: response.geometry.location,
                 });
 
-                // Add info window for each marker
                 const infoWindow = new google.maps.InfoWindow({
                   content: `
                     <div>
