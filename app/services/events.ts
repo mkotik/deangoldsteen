@@ -1,6 +1,6 @@
 import axios from "axios";
 
-type Event = {
+export type Event = {
   id: string;
   time: string;
   name: string;
