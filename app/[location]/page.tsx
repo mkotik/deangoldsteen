@@ -1,5 +1,5 @@
-import { Map } from "@/components/map";
-import { getEvents } from "@/services/events";
+import { Map } from "@/app/components/map";
+import { getEvents } from "@/app/services/events";
 
 export default async function LocationPage({
   params,
