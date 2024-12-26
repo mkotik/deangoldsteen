@@ -8,6 +8,11 @@ export type Event = {
   address: string;
   city: string;
   state: string;
+  frequency: string | null;
+  cost: string | null;
+  email: string | null;
+  link: string | null;
+  phone: string | null;
   date: string;
   event_type: "singular" | "recurring";
   recurrence_rule?: string;
