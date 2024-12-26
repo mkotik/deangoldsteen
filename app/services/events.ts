@@ -15,11 +15,13 @@ export type Event = {
 };
 
 export async function getEvents(city: string): Promise<Event[]> {
-  console.log(process.env.NEXT_PUBLIC_API_URL);
-  console.log("hi");
-  const response = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/events?city=${city}`
-  );
-  console.log(response);
-  return response.data;
+  try {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/events?city=${city}`;
+    console.log("Requesting URL:", url);
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    throw error;
+  }
 }
