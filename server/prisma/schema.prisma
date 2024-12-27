@@ -25,6 +25,8 @@ model Event {
   event_type         EventType
   recurrence_rule    String?
   recurrence_end_date DateTime?
+  longitude          Float?
+  latitude           Float?
   reviews            Review[]
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt

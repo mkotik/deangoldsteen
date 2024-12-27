@@ -43,7 +43,6 @@ export default function LocationPage() {
   useEffect(() => {
     async function fetchEvents() {
       const data = await getEvents(city);
-      console.log(data);
       setEvents(data);
     }
     fetchEvents();

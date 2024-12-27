@@ -3,15 +3,7 @@
 
 import { useEffect, useRef } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
-
-type Event = {
-  name: string;
-  venue: string;
-  address: string;
-  city: string;
-  state: string;
-  time: string;
-};
+import { Event } from "@/app/services/events";
 
 interface MapProps {
   city: string;
@@ -21,6 +13,8 @@ interface MapProps {
 
 export function Map({ city, country, events }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
+
+  const twoEvents = events.slice(0, 2);
 
   useEffect(() => {
     const initMap = async () => {
@@ -50,7 +44,8 @@ export function Map({ city, country, events }: MapProps) {
               zoom: 13,
             });
 
-            for (const event of events) {
+            for (const event of twoEvents) {
+              console.log(event);
               const address = `${event.address}, ${event.city}, ${event.state}`;
 
               try {
