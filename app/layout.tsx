@@ -5,6 +5,7 @@ import { Footer } from "@/app/components/footer";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 import Script from "next/script";
+import "react-day-picker/style.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,12 +22,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="light">
-      <head>
+      {/* <head>
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/react-day-picker@8.7.1/dist/style.min.css"
         />
-      </head>
+      </head> */}
 
       <body className={inter.className}>
         <div className="min-h-screen flex flex-col">
