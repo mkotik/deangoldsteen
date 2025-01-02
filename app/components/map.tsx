@@ -3,15 +3,7 @@
 
 import { useEffect, useRef } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
-
-type Event = {
-  name: string;
-  venue: string;
-  address: string;
-  city: string;
-  state: string;
-  time: string;
-};
+import { Event } from "@/app/services/events";
 
 interface MapProps {
   city: string;
@@ -27,77 +19,51 @@ export function Map({ city, country, events }: MapProps) {
       const loader = new Loader({
         apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
         version: "weekly",
+        mapIds: [process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID as string],
       });
 
-      const { Map: GoogleMap } = (await loader.importLibrary("maps")) as {
-        Map: typeof google.maps.Map;
-      };
-      const { Geocoder } = (await loader.importLibrary("geocoding")) as {
-        Geocoder: typeof google.maps.Geocoder;
-      };
+      const { Map: GoogleMap } = await loader.importLibrary("maps");
+      const { AdvancedMarkerElement } = await loader.importLibrary("marker");
 
-      const geocoder = new Geocoder();
-
-      geocoder.geocode(
-        { address: `${city}, ${country}` },
-        async (
-          results: google.maps.GeocoderResult[] | null,
-          status: google.maps.GeocoderStatus
-        ) => {
-          if (status === "OK" && results && results[0]) {
-            const map = new GoogleMap(mapRef.current as HTMLElement, {
-              center: results[0].geometry.location,
-              zoom: 13,
-            });
-
-            for (const event of events) {
-              const address = `${event.address}, ${event.city}, ${event.state}`;
-
-              try {
-                const response = await new Promise<google.maps.GeocoderResult>(
-                  (resolve, reject) => {
-                    geocoder.geocode(
-                      { address },
-                      (
-                        results: google.maps.GeocoderResult[] | null,
-                        status: google.maps.GeocoderStatus
-                      ) => {
-                        if (status === "OK" && results && results[0]) {
-                          resolve(results[0]);
-                        } else {
-                          reject(status);
-                        }
-                      }
-                    );
-                  }
-                );
-
-                const marker = new google.maps.Marker({
-                  map,
-                  position: response.geometry.location,
-                });
-
-                const infoWindow = new google.maps.InfoWindow({
-                  content: `
-                    <div>
-                      <h3>${event.name}</h3>
-                      <p>${event.venue}</p>
-                      <p>${event.address}</p>
-                      <p>Time: ${event.time}</p>
-                    </div>
-                  `,
-                });
-
-                marker.addListener("click", () => {
-                  infoWindow.open(map, marker);
-                });
-              } catch (error) {
-                console.error(`Error geocoding ${address}:`, error);
-              }
-            }
-          }
-        }
+      const eventWithCoords = events.find(
+        (event) => event.latitude && event.longitude
       );
+
+      const map = new GoogleMap(mapRef.current as HTMLElement, {
+        center: eventWithCoords
+          ? { lat: eventWithCoords.latitude!, lng: eventWithCoords.longitude! }
+          : { lat: 40.7128, lng: -74.006 },
+        zoom: 13,
+        mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID as string,
+      });
+
+      events.forEach((event) => {
+        if (event.latitude && event.longitude) {
+          const marker = new AdvancedMarkerElement({
+            map,
+            position: {
+              lat: event.latitude,
+              lng: event.longitude,
+            },
+            title: event.name || undefined,
+          });
+
+          const infoWindow = new google.maps.InfoWindow({
+            content: `
+              <div>
+                <h3>${event.name}</h3>
+                <p>${event.venue}</p>
+                <p>${event.address}</p>
+                <p>Time: ${event.time}</p>
+              </div>
+            `,
+          });
+
+          marker.addListener("click", () => {
+            infoWindow.open(map, marker);
+          });
+        }
+      });
     };
 
     initMap();

@@ -1,8 +1,18 @@
 import express from "express";
+import cors from "cors";
 import eventRoutes from "./routes/events";
 
 const app = express();
-const port = process.env.PORT || 6000;
+const port = process.env.PORT || 3001;
+
+// CORS configuration
+app.use(
+  cors({
+    origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
