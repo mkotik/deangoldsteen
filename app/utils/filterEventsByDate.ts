@@ -7,6 +7,10 @@ export function filterEventsByDate(
   selectedDate: Date
 ): Event[] {
   return events.filter((event) => {
+    // Remove any spaces from the recurrence rule string
+    if (event.recurrence_rule) {
+      event.recurrence_rule = event.recurrence_rule.replace(/\s+/g, "");
+    }
     // For singular events, just compare the dates
     if (event.event_type === "singular") {
       return isSameDay(new Date(event.date), selectedDate);
@@ -24,6 +28,7 @@ export function filterEventsByDate(
         return occurrences.some((date) => isSameDay(date, selectedDate));
       } catch (error) {
         console.error(`Invalid recurrence rule for event ${event.id}:`, error);
+        console.log(event);
         return false;
       }
     }

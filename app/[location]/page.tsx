@@ -112,7 +112,7 @@ export default function LocationPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.map((event, index) => (
+              {filteredEvents.map((event, index) => (
                 <TableRow key={index}>
                   <TableCell>{event.time}</TableCell>
                   <TableCell className="font-medium">{event.name}</TableCell>
