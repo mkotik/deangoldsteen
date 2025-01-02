@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/app/components/ui/card";
 import { Search } from "lucide-react";
-
+import { LocationSearch } from "@/app/components/LocationSearch";
 const regions = {
   "United States": [
     ["New York", "Los Angeles", "Chicago", "Austin"],
@@ -38,7 +38,8 @@ export default function HomePage() {
         </p>
         <div className="flex gap-2">
           <div className="flex-1">
-            <Input placeholder="Search by city or region..." />
+            {/* <Input placeholder="Search by city or region..." /> */}
+            <LocationSearch />
           </div>
           <Button>
             <Search className="h-4 w-4 mr-2" />
