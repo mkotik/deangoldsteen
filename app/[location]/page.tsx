@@ -4,20 +4,15 @@ import { Map } from "@/app/components/map";
 import { getEvents, Event } from "@/app/services/events";
 import { useState, useEffect } from "react";
 import { DatePicker } from "@/app/components/ui/date-picker";
+import { Button } from "@/app/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/app/components/ui/card";
-import { format, addDays, isSameDay } from "date-fns";
+import { format, addDays } from "date-fns";
 import { useParams } from "next/navigation";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/app/components/ui/tooltip";
 import {
   Table,
   TableBody,
@@ -29,16 +24,19 @@ import {
 import { Badge } from "@/app/components/ui/badge";
 import { Info, MapPin, Phone, LinkIcon } from "lucide-react";
 import { filterEventsByDate } from "@/app/utils/filterEventsByDate";
+import { EventDetailsModal } from "@/app/components/EventDetailsModal";
+
 export default function LocationPage() {
   const params = useParams();
   const location = (params.location as string).replace(/-/g, " ");
   const decodedLocation = decodeURIComponent(location);
   const [city, country] = decodedLocation.split(",").map((part) => part.trim());
   const [events, setEvents] = useState<Event[]>([]);
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date()
   );
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const maxDate = addDays(new Date(), 30);
 
   useEffect(() => {
@@ -50,17 +48,7 @@ export default function LocationPage() {
   }, [city]);
 
   useEffect(() => {
-    if (selectedDate) {
-      const filteredEvents = filterEventsByDate(events, selectedDate);
-      setFilteredEvents(filteredEvents);
-    }
-  }, [events]);
-
-  useEffect(() => {
-    if (selectedDate) {
-      const filteredEvents = filterEventsByDate(events, selectedDate);
-      setFilteredEvents(filteredEvents);
-    }
+    setEvents([]);
   }, [selectedDate]);
 
   return (
@@ -71,7 +59,7 @@ export default function LocationPage() {
           <Map
             city={city}
             country={country || "United States"}
-            events={filteredEvents}
+            events={events}
           />
         </div>
         <div className="w-full md:w-1/3">
@@ -90,7 +78,7 @@ export default function LocationPage() {
           </Card>
         </div>
       </div>
-      <Card>
+      <Card className="mt-8">
         <CardHeader>
           <CardTitle>
             Events on{" "}
@@ -112,49 +100,16 @@ export default function LocationPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredEvents.map((event, index) => (
+              {events.map((event, index) => (
                 <TableRow key={index}>
                   <TableCell>{event.time}</TableCell>
                   <TableCell className="font-medium">{event.name}</TableCell>
-                  <TableCell>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="underline decoration-dotted">
-                          {event.venue}
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>
-                            <MapPin className="inline mr-2" size={16} />
-                            {event.address}, {event.city}, {event.state}
-                          </p>
-                          {event.phone && (
-                            <p>
-                              <Phone className="inline mr-2" size={16} />
-                              {event.phone}
-                            </p>
-                          )}
-                          {event.link && (
-                            <p>
-                              <LinkIcon className="inline mr-2" size={16} />
-                              <a
-                                href={event.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-500 hover:underline"
-                              >
-                                Website
-                              </a>
-                            </p>
-                          )}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </TableCell>
+                  <TableCell>{event.venue}</TableCell>
                   <TableCell>{event.frequency}</TableCell>
                   <TableCell>
                     <Badge
                       variant={
-                        event.cost.toLowerCase() === "free"
+                        event.cost?.toLowerCase() === "free"
                           ? "secondary"
                           : "default"
                       }
@@ -163,43 +118,31 @@ export default function LocationPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="text-gray-500 hover:text-gray-700" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-sm">
-                          <p className="font-semibold mb-2">
-                            Event Information:
-                          </p>
-                          <p>{event.info}</p>
-                          {event.email && (
-                            <p className="mt-2">
-                              Contact:{" "}
-                              <a
-                                href={`mailto:${event.email}`}
-                                className="text-blue-500 hover:underline"
-                              >
-                                {event.email}
-                              </a>
-                            </p>
-                          )}
-                          <p className="mt-2">
-                            Event Type:{" "}
-                            {event.event_type.charAt(0).toUpperCase() +
-                              event.event_type.slice(1)}
-                          </p>
-                          {event.recurrence_rule && (
-                            <p>Recurrence: {event.recurrence_rule}</p>
-                          )}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <div
+                      onClick={() => {
+                        setSelectedEvent(event);
+                        setIsModalOpen(true);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <Info className="text-gray-500 hover:text-gray-700" />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+          {selectedEvent && (
+            <EventDetailsModal
+              event={selectedEvent}
+              isOpen={isModalOpen}
+              selectedDate={selectedDate}
+              onClose={() => {
+                setIsModalOpen(false);
+                setSelectedEvent(null);
+              }}
+            />
+          )}
         </CardContent>
       </Card>
     </div>
