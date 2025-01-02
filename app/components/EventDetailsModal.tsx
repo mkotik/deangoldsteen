@@ -48,7 +48,8 @@ export function EventDetailsModal({
             <div>
               <p className="font-medium">Event Details</p>
               <p className="text-sm text-muted-foreground">
-                {format(selectedDate, "MMMM d, yyyy")} at {event.time}
+                {selectedDate ? format(selectedDate, "MMMM d, yyyy") : "Date"}{" "}
+                at {event.time}
               </p>
               <p className="text-sm text-muted-foreground">
                 Frequency: {event.frequency || "One-time event"}
