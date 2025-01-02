@@ -2,13 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/app/components/ui/input";
-import { useRouter } from "next/navigation";
 
-export function LocationSearch() {
+interface LocationSearchProps {
+  onPlaceSelect: (city: string, region: string) => void;
+  selectedPlace: google.maps.places.PlaceResult | null;
+  setSelectedPlace: (place: google.maps.places.PlaceResult | null) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+}
+
+export function LocationSearch({
+  onPlaceSelect,
+  selectedPlace,
+  setSelectedPlace,
+  onKeyDown,
+}: LocationSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
-  const [autocomplete, setAutocomplete] =
-    useState<google.maps.places.Autocomplete | null>(null);
 
   useEffect(() => {
     if (!inputRef.current) return;
@@ -26,28 +34,13 @@ export function LocationSearch() {
 
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
-      if (!place.address_components) return;
-
-      const city = place.address_components.find(
-        (component) =>
-          component.types.includes("locality") ||
-          component.types.includes("sublocality")
-      )?.long_name;
-
-      if (city) {
-        const formattedCity = city.toLowerCase().replace(/\s+/g, "-");
-        router.push(`/${formattedCity}`);
-      }
+      setSelectedPlace(place);
     });
 
-    setAutocomplete(autocomplete);
-
     return () => {
-      if (autocomplete) {
-        google.maps.event.clearInstanceListeners(autocomplete);
-      }
+      google.maps.event.clearInstanceListeners(autocomplete);
     };
-  }, [router]);
+  }, []);
 
   return (
     <Input
@@ -55,6 +48,7 @@ export function LocationSearch() {
       type="text"
       placeholder="Enter a city..."
       className="w-full"
+      onKeyDown={onKeyDown}
     />
   );
 }

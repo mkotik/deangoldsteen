@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Input } from "@/app/components/ui/input";
 import { Button } from "@/app/components/ui/button";
@@ -9,6 +11,9 @@ import {
 } from "@/app/components/ui/card";
 import { Search } from "lucide-react";
 import { LocationSearch } from "@/app/components/LocationSearch";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 const regions = {
   "United States": [
     ["New York", "Los Angeles", "Chicago", "Austin"],
@@ -26,6 +31,10 @@ const regions = {
 };
 
 export default function HomePage() {
+  const router = useRouter();
+  const [selectedPlace, setSelectedPlace] =
+    useState<google.maps.places.PlaceResult | null>(null);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <section className="max-w-2xl mx-auto text-center mb-12">
@@ -38,10 +47,57 @@ export default function HomePage() {
         </p>
         <div className="flex gap-2">
           <div className="flex-1">
-            {/* <Input placeholder="Search by city or region..." /> */}
-            <LocationSearch />
+            <LocationSearch
+              selectedPlace={selectedPlace}
+              setSelectedPlace={setSelectedPlace}
+              onPlaceSelect={(city, region) => {
+                const formattedCity = city.toLowerCase().replace(/\s+/g, "-");
+                router.push(`/${formattedCity},${region}`);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && selectedPlace?.address_components) {
+                  const city = selectedPlace.address_components.find(
+                    (component) =>
+                      component.types.includes("locality") ||
+                      component.types.includes("sublocality")
+                  )?.long_name;
+
+                  const region = selectedPlace.address_components.find(
+                    (component) => component.types.includes("country")
+                  )?.long_name;
+
+                  console.log(city, region);
+
+                  if (city && region) {
+                    const formattedCity = city
+                      .toLowerCase()
+                      .replace(/\s+/g, "-");
+                    router.push(`/${formattedCity},${region}`);
+                  }
+                }
+              }}
+            />
           </div>
-          <Button>
+          <Button
+            onClick={() => {
+              if (selectedPlace?.address_components) {
+                const city = selectedPlace.address_components.find(
+                  (component) =>
+                    component.types.includes("locality") ||
+                    component.types.includes("sublocality")
+                )?.long_name;
+
+                const region = selectedPlace.address_components.find(
+                  (component) => component.types.includes("country")
+                )?.long_name;
+
+                if (city && region) {
+                  const formattedCity = city.toLowerCase().replace(/\s+/g, "-");
+                  router.push(`/${formattedCity},${region}`);
+                }
+              }
+            }}
+          >
             <Search className="h-4 w-4 mr-2" />
             Search
           </Button>
