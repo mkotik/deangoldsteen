@@ -7,11 +7,12 @@ import { Event } from "@/app/services/events";
 
 interface MapProps {
   city: string;
+  state: string;
   country: string;
   events: Event[];
 }
 
-export function Map({ city, country, events }: MapProps) {
+export function Map({ city, state, country, events }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,15 +25,16 @@ export function Map({ city, country, events }: MapProps) {
 
       const { Map: GoogleMap } = await loader.importLibrary("maps");
       const { AdvancedMarkerElement } = await loader.importLibrary("marker");
+      const { Geocoder } = await loader.importLibrary("geocoding");
 
-      const eventWithCoords = events.find(
-        (event) => event.latitude && event.longitude
-      );
+      // Geocode the location first
+      const geocoder = new Geocoder();
+      const response = await geocoder.geocode({
+        address: `${city}, ${state}, ${country}`,
+      });
 
       const map = new GoogleMap(mapRef.current as HTMLElement, {
-        center: eventWithCoords
-          ? { lat: eventWithCoords.latitude!, lng: eventWithCoords.longitude! }
-          : { lat: 40.7128, lng: -74.006 },
+        center: response.results[0].geometry.location,
         zoom: 13,
         mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID as string,
       });
@@ -67,7 +69,7 @@ export function Map({ city, country, events }: MapProps) {
     };
 
     initMap();
-  }, [city, country, events]);
+  }, [city, state, country, events]);
 
   return <div ref={mapRef} style={{ width: "100%", height: "400px" }} />;
 }

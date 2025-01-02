@@ -30,7 +30,9 @@ export default function LocationPage() {
   const params = useParams();
   const location = (params.location as string).replace(/-/g, " ");
   const decodedLocation = decodeURIComponent(location);
-  const [city, country] = decodedLocation.split(",").map((part) => part.trim());
+  const [city, state, country] = decodedLocation
+    .split(",")
+    .map((part) => part.trim());
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date()
@@ -58,6 +60,7 @@ export default function LocationPage() {
         <div className="w-full md:w-2/3">
           <Map
             city={city}
+            state={state}
             country={country || "United States"}
             events={events}
           />

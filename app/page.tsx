@@ -62,17 +62,22 @@ export default function HomePage() {
                       component.types.includes("sublocality")
                   )?.long_name;
 
-                  const region = selectedPlace.address_components.find(
+                  const state = selectedPlace.address_components.find(
+                    (component) =>
+                      component.types.includes("administrative_area_level_1")
+                  )?.short_name;
+
+                  const country = selectedPlace.address_components.find(
                     (component) => component.types.includes("country")
                   )?.long_name;
 
-                  console.log(city, region);
+                  console.log(city, state, country);
 
-                  if (city && region) {
+                  if (city && state && country) {
                     const formattedCity = city
                       .toLowerCase()
                       .replace(/\s+/g, "-");
-                    router.push(`/${formattedCity},${region}`);
+                    router.push(`/${formattedCity}-${state},${country}`);
                   }
                 }
               }}
@@ -87,13 +92,18 @@ export default function HomePage() {
                     component.types.includes("sublocality")
                 )?.long_name;
 
-                const region = selectedPlace.address_components.find(
+                const state = selectedPlace.address_components.find(
+                  (component) =>
+                    component.types.includes("administrative_area_level_1")
+                )?.short_name;
+
+                const country = selectedPlace.address_components.find(
                   (component) => component.types.includes("country")
                 )?.long_name;
 
-                if (city && region) {
+                if (city && state && country) {
                   const formattedCity = city.toLowerCase().replace(/\s+/g, "-");
-                  router.push(`/${formattedCity},${region}`);
+                  router.push(`/${formattedCity}-${state},${country}`);
                 }
               }
             }}
