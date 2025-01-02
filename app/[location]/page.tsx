@@ -28,13 +28,14 @@ import {
 } from "@/app/components/ui/table";
 import { Badge } from "@/app/components/ui/badge";
 import { Info, MapPin, Phone, LinkIcon } from "lucide-react";
-
+import { filterEventsByDate } from "@/app/utils/filterEventsByDate";
 export default function LocationPage() {
   const params = useParams();
   const location = (params.location as string).replace(/-/g, " ");
   const decodedLocation = decodeURIComponent(location);
   const [city, country] = decodedLocation.split(",").map((part) => part.trim());
   const [events, setEvents] = useState<Event[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date()
   );
@@ -48,6 +49,20 @@ export default function LocationPage() {
     fetchEvents();
   }, [city]);
 
+  useEffect(() => {
+    if (selectedDate) {
+      const filteredEvents = filterEventsByDate(events, selectedDate);
+      setFilteredEvents(filteredEvents);
+    }
+  }, [events]);
+
+  useEffect(() => {
+    if (selectedDate) {
+      const filteredEvents = filterEventsByDate(events, selectedDate);
+      setFilteredEvents(filteredEvents);
+    }
+  }, [selectedDate]);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-4">Open Mic Events in {city}</h1>
@@ -56,7 +71,7 @@ export default function LocationPage() {
           <Map
             city={city}
             country={country || "United States"}
-            events={events}
+            events={filteredEvents}
           />
         </div>
         <div className="w-full md:w-1/3">

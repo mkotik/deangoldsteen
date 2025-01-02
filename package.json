@@ -28,6 +28,7 @@
     "react-day-picker": "^9.4.4",
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
+    "rrule": "^2.8.1",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7"
   },

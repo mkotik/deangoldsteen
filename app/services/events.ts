@@ -1,23 +1,7 @@
 import axios from "axios";
+import { Event } from "@/types/event";
 
-export type Event = {
-  id: string;
-  time: string;
-  name: string;
-  venue: string;
-  address: string;
-  city: string;
-  state: string;
-  frequency: string | null;
-  cost: string | null;
-  email: string | null;
-  link: string | null;
-  phone: string | null;
-  date: string;
-  event_type: "singular" | "recurring";
-  recurrence_rule?: string;
-  info?: string;
-};
+export type { Event };
 
 export async function getEvents(city: string): Promise<Event[]> {
   try {
