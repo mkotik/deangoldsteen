@@ -39,6 +39,8 @@ export default function LocationPage() {
   );
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+
   const maxDate = addDays(new Date(), 30);
 
   useEffect(() => {
@@ -50,9 +52,19 @@ export default function LocationPage() {
   }, [city]);
 
   useEffect(() => {
-    setEvents([]);
-  }, [selectedDate]);
+    if (selectedDate) {
+      const filteredEvents = filterEventsByDate(events, selectedDate);
+      setFilteredEvents(filteredEvents);
+    }
+  }, [events]);
 
+  useEffect(() => {
+    if (selectedDate) {
+      const filteredEvents = filterEventsByDate(events, selectedDate);
+      console.log("Filtered events:", filteredEvents);
+      setFilteredEvents(filteredEvents);
+    }
+  }, [selectedDate]);
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-4">Open Mic Events in {city}</h1>
@@ -62,7 +74,7 @@ export default function LocationPage() {
             city={city}
             state={state}
             country={country || "United States"}
-            events={events}
+            events={filteredEvents}
           />
         </div>
         <div className="w-full md:w-1/3">
@@ -103,7 +115,7 @@ export default function LocationPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.map((event, index) => (
+              {filteredEvents.map((event, index) => (
                 <TableRow key={index}>
                   <TableCell>{event.time}</TableCell>
                   <TableCell className="font-medium">{event.name}</TableCell>
