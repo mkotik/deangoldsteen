@@ -76,8 +76,8 @@ export default function LocationPage() {
   useEffect(() => {
     async function fetchEvents() {
       if (coordinates) {
-        // const data = await getEvents(coordinates);
-        const data = await getEvents(city);
+        const data = await getEvents(coordinates);
+        // const data = await getEvents(city);
         setEvents(data);
       }
     }
