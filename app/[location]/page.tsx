@@ -46,6 +46,11 @@ export default function LocationPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
 
+  const capitalizedCity = city
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
   const maxDate = addDays(new Date(), 30);
   const loader = new Loader({
     apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
@@ -100,7 +105,9 @@ export default function LocationPage() {
   }, [selectedDate]);
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Open Mic Events in {city}</h1>
+      <h1 className="text-3xl font-bold mb-4">
+        Open Mic Events in {capitalizedCity}
+      </h1>
       <div className="flex flex-col md:flex-row gap-8">
         <div className="w-full md:w-2/3">
           <Map
