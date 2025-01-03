@@ -1,3 +1,4 @@
+/* eslint-disable */
 /// <reference types="@types/google.maps" />
 "use client";
 
@@ -9,9 +10,19 @@ interface MapProps {
   events: Event[];
   coordinates: { lat: number; lng: number } | null;
   loader: Loader;
+  city: string;
+  state: string;
+  country: string;
 }
 
-export function Map({ coordinates, events, loader }: MapProps) {
+export function Map({
+  coordinates,
+  events,
+  loader,
+  city,
+  state,
+  country,
+}: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
