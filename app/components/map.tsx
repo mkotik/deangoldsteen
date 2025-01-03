@@ -6,22 +6,12 @@ import { Loader } from "@googlemaps/js-api-loader";
 import { Event } from "@/app/services/events";
 
 interface MapProps {
-  city: string;
-  state: string;
-  country: string;
   events: Event[];
   coordinates: { lat: number; lng: number } | null;
   loader: Loader;
 }
 
-export function Map({
-  coordinates,
-  city,
-  state,
-  country,
-  events,
-  loader,
-}: MapProps) {
+export function Map({ coordinates, events, loader }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
