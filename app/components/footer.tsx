@@ -8,14 +8,14 @@ export function Footer() {
           <div>
             <h3 className="font-semibold mb-3">About</h3>
             <p className="text-sm text-muted-foreground">
-              The Open Mic Directory helps performers find open mic events in
-              their area.
+              The Dean Goldsteen Directory helps performers find open mic events
+              in their area.
             </p>
           </div>
           <div>
             <h3 className="font-semibold mb-3">Contact</h3>
             <p className="text-sm text-muted-foreground">
-              Email: contact@openmicdirectory.com
+              Email: deangoldsteen@yahoo.com
             </p>
           </div>
           <div>
@@ -71,7 +71,7 @@ export function Footer() {
         </div>
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
           <p>
-            &copy; {new Date().getFullYear()} Open Mic Directory. All rights
+            &copy; {new Date().getFullYear()} Dean Goldsteen. All rights
             reserved.
           </p>
         </div>

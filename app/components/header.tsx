@@ -38,7 +38,7 @@ export function Header() {
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
             <MapPin className="h-6 w-6" />
-            <span className="text-xl font-bold">Open Mic Directory</span>
+            <span className="text-xl font-bold">Dean Goldsteen</span>
           </Link>
           <div className="hidden md:flex items-center space-x-4">
             {/* <NavigationMenu>
