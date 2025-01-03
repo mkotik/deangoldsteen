@@ -27,6 +27,20 @@ export default function RootLayout({
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
           strategy="beforeInteractive"
         />
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-NEZBLNTKC1"
+        ></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-NEZBLNTKC1');
+            `,
+          }}
+        ></script>
       </head>
 
       <body className={inter.className}>
