@@ -25,41 +25,98 @@ import { Badge } from "@/app/components/ui/badge";
 import { Info, MapPin, Phone, LinkIcon } from "lucide-react";
 import { filterEventsByDate } from "@/app/utils/filterEventsByDate";
 import { EventDetailsModal } from "@/app/components/EventDetailsModal";
+import { Loader } from "@googlemaps/js-api-loader";
 
 export default function LocationPage() {
   const params = useParams();
   const location = (params.location as string).replace(/-/g, " ");
   const decodedLocation = decodeURIComponent(location);
-  const [city, country] = decodedLocation.split(",").map((part) => part.trim());
+  const [city, state, country] = decodedLocation
+    .split(",")
+    .map((part) => part.trim());
   const [events, setEvents] = useState<Event[]>([]);
+  const [coordinates, setCoordinates] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date()
   );
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+
+  const capitalizedCity = city
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
   const maxDate = addDays(new Date(), 30);
+  const loader = new Loader({
+    apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    version: "weekly",
+  });
+  useEffect(() => {
+    async function getCoordinates() {
+      const { Geocoder } = await loader.importLibrary("geocoding");
+      const geocoder = new Geocoder();
+
+      try {
+        const response = await geocoder.geocode({
+          address: `${city}, ${state}, ${country}`,
+        });
+
+        if (response.results[0]?.geometry?.location) {
+          const { lat, lng } = response.results[0].geometry.location;
+          setCoordinates({ lat: lat(), lng: lng() });
+        }
+      } catch (error) {
+        console.error("Error geocoding location:", error);
+      }
+    }
+
+    getCoordinates();
+  }, [city, state, country]);
 
   useEffect(() => {
     async function fetchEvents() {
-      const data = await getEvents(city);
-      setEvents(data);
+      if (coordinates) {
+        const data = await getEvents(coordinates);
+        // const data = await getEvents(city);
+        setEvents(data);
+      }
     }
     fetchEvents();
-  }, [city]);
+  }, [coordinates]);
 
   useEffect(() => {
-    setEvents([]);
-  }, [selectedDate]);
+    if (selectedDate) {
+      const filteredEvents = filterEventsByDate(events, selectedDate);
+      setFilteredEvents(filteredEvents);
+    }
+  }, [events]);
 
+  useEffect(() => {
+    if (selectedDate) {
+      const filteredEvents = filterEventsByDate(events, selectedDate);
+      console.log("Filtered events:", filteredEvents);
+      setFilteredEvents(filteredEvents);
+    }
+  }, [selectedDate]);
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Open Mic Events in {city}</h1>
+      <h1 className="text-3xl font-bold mb-4">
+        Open Mic Events in {capitalizedCity}
+      </h1>
       <div className="flex flex-col md:flex-row gap-8">
         <div className="w-full md:w-2/3">
           <Map
+            loader={loader}
+            coordinates={coordinates}
             city={city}
+            state={state}
             country={country || "United States"}
-            events={events}
+            events={filteredEvents}
           />
         </div>
         <div className="w-full md:w-1/3">
@@ -100,7 +157,7 @@ export default function LocationPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.map((event, index) => (
+              {filteredEvents.map((event, index) => (
                 <TableRow key={index}>
                   <TableCell>{event.time}</TableCell>
                   <TableCell className="font-medium">{event.name}</TableCell>

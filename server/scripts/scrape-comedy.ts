@@ -23,13 +23,13 @@ interface ScrapedEvent {
   recurrence_end_date?: Date;
 }
 
-async function scrapeComedyEvents() {
+async function scrapeComedyEvents(state: string) {
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
 
   try {
     await page.goto(
-      "https://badslava.com/open-mics-state.php?state=NY&type=Comedy"
+      `https://web.archive.org/web/20220327092905/http://badslava.com/open-mics-state.php?state=${state}&type=Comedy`
     );
 
     const events = await page.evaluate(() => {
@@ -47,7 +47,9 @@ async function scrapeComedyEvents() {
         }
         if (prevFontElement) {
           const boldText =
-            prevFontElement.querySelector("b")?.textContent?.trim() || "";
+            prevFontElement.querySelector("b")?.textContent?.trim() ||
+            prevFontElement.textContent?.trim() ||
+            "";
           const dateMatch = boldText.match(/\d{1,2}\/\d{1,2}\/\d{2}/);
           dateStr = dateMatch ? dateMatch[0] : "";
         }
@@ -186,4 +188,58 @@ async function scrapeComedyEvents() {
   }
 }
 
-scrapeComedyEvents().catch(console.error);
+const states = [
+  // "CO",
+  // "CT",
+  // "DE",
+  // "FL",
+  // "GA",
+  // "HI",
+  // "ID",
+  // "IL",
+  // "IN",
+  // "IA",
+  // "KS",
+  // "KY",
+  // "LA",
+  // "ME",
+  // "MD",
+  "MA",
+  // "MI",
+  // "MN",
+  // "MS",
+  // "MO",
+  // "MT",
+  // "NE",
+  // "NV",
+  // "NH",
+  // "NM",
+  // "NC",
+  // "ND",
+  // "OH",
+  // "OK",
+  // "OR",
+  // "PA",
+  // "RI",
+  // "SC",
+  // "SD",
+  // "TN",
+  // "UT",
+  // "VT",
+  // "VA",
+  // "WA",
+  // "WV",
+  // "WI",
+  // "WY",
+];
+
+async function scrapeAllStates() {
+  for (const state of states) {
+    console.log(`Scraping events for ${state}...`);
+    await scrapeComedyEvents(state);
+    // Add a delay between states to avoid overwhelming the server
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+}
+
+scrapeAllStates().catch(console.error);

@@ -35,45 +35,35 @@ export function Header() {
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+        {/* Mobile Layout */}
+        <div className="flex flex-col space-y-4 sm:hidden">
+          <Link href="/" className="flex items-center space-x-2">
+            <MapPin className="h-5 w-5" />
+            <span className="text-lg font-bold">Dean Goldsteen Directory</span>
+          </Link>
+          <div className="relative">
+            <Button variant="default" className="w-full" disabled>
+              Post Your Open Mic
+            </Button>
+            <span className="absolute -top-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
+              Coming Soon
+            </span>
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden sm:flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
             <MapPin className="h-6 w-6" />
-            <span className="text-xl font-bold">Open Mic Directory</span>
+            <span className="text-xl font-bold">Dean Goldsteen Directory</span>
           </Link>
-          <div className="hidden md:flex items-center space-x-4">
-            <NavigationMenu>
-              <NavigationMenuList>
-                {Object.entries(regions).map(([region, cities]) => (
-                  <NavigationMenuItem key={region}>
-                    <NavigationMenuTrigger>{region}</NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <div className="grid gap-3 p-6 w-[400px]">
-                        {cities.map((row, i) => (
-                          <div key={i} className="flex gap-3">
-                            {row.map((city) => (
-                              <NavigationMenuLink
-                                key={city}
-                                asChild
-                                className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                              >
-                                <Link
-                                  href={`/${city
-                                    .toLowerCase()
-                                    .replace(" ", "-")}`}
-                                >
-                                  {city}
-                                </Link>
-                              </NavigationMenuLink>
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                ))}
-              </NavigationMenuList>
-            </NavigationMenu>
-            <Button variant="default">Post Your Open Mic</Button>
+          <div className="relative">
+            <Button variant="default" disabled>
+              Post Your Open Mic
+            </Button>
+            <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
+              Coming Soon
+            </span>
           </div>
         </div>
       </div>

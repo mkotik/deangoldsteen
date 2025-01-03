@@ -22,12 +22,26 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="light">
-      {/* <head>
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/react-day-picker@8.7.1/dist/style.min.css"
+      <head>
+        <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
+          strategy="beforeInteractive"
         />
-      </head> */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-NEZBLNTKC1"
+        ></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-NEZBLNTKC1');
+            `,
+          }}
+        ></script>
+      </head>
 
       <body className={inter.className}>
         <div className="min-h-screen flex flex-col">

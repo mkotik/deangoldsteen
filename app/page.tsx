@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Input } from "@/app/components/ui/input";
 import { Button } from "@/app/components/ui/button";
@@ -8,6 +10,9 @@ import {
   CardTitle,
 } from "@/app/components/ui/card";
 import { Search } from "lucide-react";
+import { LocationSearch } from "@/app/components/LocationSearch";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const regions = {
   "United States": [
@@ -26,6 +31,10 @@ const regions = {
 };
 
 export default function HomePage() {
+  const router = useRouter();
+  const [selectedPlace, setSelectedPlace] =
+    useState<google.maps.places.PlaceResult | null>(null);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <section className="max-w-2xl mx-auto text-center mb-12">
@@ -38,9 +47,67 @@ export default function HomePage() {
         </p>
         <div className="flex gap-2">
           <div className="flex-1">
-            <Input placeholder="Search by city or region..." />
+            <LocationSearch
+              selectedPlace={selectedPlace}
+              setSelectedPlace={setSelectedPlace}
+              onPlaceSelect={(city, region) => {
+                const formattedCity = city.toLowerCase().replace(/\s+/g, "-");
+                router.push(`/${formattedCity},${region}`);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && selectedPlace?.address_components) {
+                  const city = selectedPlace.address_components.find(
+                    (component) =>
+                      component.types.includes("locality") ||
+                      component.types.includes("sublocality")
+                  )?.long_name;
+
+                  const state = selectedPlace.address_components.find(
+                    (component) =>
+                      component.types.includes("administrative_area_level_1")
+                  )?.short_name;
+
+                  const country = selectedPlace.address_components.find(
+                    (component) => component.types.includes("country")
+                  )?.long_name;
+
+                  console.log(city, state, country);
+
+                  if (city && state && country) {
+                    const formattedCity = city
+                      .toLowerCase()
+                      .replace(/\s+/g, "-");
+                    router.push(`/${formattedCity}-${state},${country}`);
+                  }
+                }
+              }}
+            />
           </div>
-          <Button>
+          <Button
+            onClick={() => {
+              if (selectedPlace?.address_components) {
+                const city = selectedPlace.address_components.find(
+                  (component) =>
+                    component.types.includes("locality") ||
+                    component.types.includes("sublocality")
+                )?.long_name;
+
+                const state = selectedPlace.address_components.find(
+                  (component) =>
+                    component.types.includes("administrative_area_level_1")
+                )?.short_name;
+
+                const country = selectedPlace.address_components.find(
+                  (component) => component.types.includes("country")
+                )?.long_name;
+
+                if (city && state && country) {
+                  const formattedCity = city.toLowerCase().replace(/\s+/g, "-");
+                  router.push(`/${formattedCity}-${state},${country}`);
+                }
+              }
+            }}
+          >
             <Search className="h-4 w-4 mr-2" />
             Search
           </Button>
@@ -49,7 +116,10 @@ export default function HomePage() {
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Object.entries(regions).map(([region, cities]) => (
-          <Card key={region}>
+          <Card
+            key={region}
+            className={region !== "United States" ? "relative opacity-50" : ""}
+          >
             <CardHeader>
               <CardTitle>{region}</CardTitle>
             </CardHeader>
@@ -61,6 +131,7 @@ export default function HomePage() {
                       variant="link"
                       className="text-left w-full justify-start p-0 h-auto"
                       asChild
+                      disabled={region !== "United States"}
                     >
                       <Link
                         href={`/${city
@@ -74,6 +145,13 @@ export default function HomePage() {
                 ))}
               </ul>
             </CardContent>
+            {region !== "United States" && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+                <span className="text-2xl font-bold text-primary">
+                  Coming Soon
+                </span>
+              </div>
+            )}
           </Card>
         ))}
       </div>
