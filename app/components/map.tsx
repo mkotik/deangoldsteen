@@ -10,31 +10,29 @@ interface MapProps {
   state: string;
   country: string;
   events: Event[];
+  coordinates: { lat: number; lng: number } | null;
+  loader: Loader;
 }
 
-export function Map({ city, state, country, events }: MapProps) {
+export function Map({
+  coordinates,
+  city,
+  state,
+  country,
+  events,
+  loader,
+}: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const initMap = async () => {
-      const loader = new Loader({
-        apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
-        version: "weekly",
-        mapIds: [process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID as string],
-      });
+      if (!coordinates) return;
 
       const { Map: GoogleMap } = await loader.importLibrary("maps");
       const { AdvancedMarkerElement } = await loader.importLibrary("marker");
-      const { Geocoder } = await loader.importLibrary("geocoding");
-
-      // Geocode the location first
-      const geocoder = new Geocoder();
-      const response = await geocoder.geocode({
-        address: `${city}, ${state}, ${country}`,
-      });
 
       const map = new GoogleMap(mapRef.current as HTMLElement, {
-        center: response.results[0].geometry.location,
+        center: coordinates,
         zoom: 13,
         mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID as string,
       });
@@ -69,7 +67,7 @@ export function Map({ city, state, country, events }: MapProps) {
     };
 
     initMap();
-  }, [city, state, country, events]);
+  }, [coordinates, events]);
 
   return <div ref={mapRef} style={{ width: "100%", height: "400px" }} />;
 }

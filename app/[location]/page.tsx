@@ -25,6 +25,7 @@ import { Badge } from "@/app/components/ui/badge";
 import { Info, MapPin, Phone, LinkIcon } from "lucide-react";
 import { filterEventsByDate } from "@/app/utils/filterEventsByDate";
 import { EventDetailsModal } from "@/app/components/EventDetailsModal";
+import { Loader } from "@googlemaps/js-api-loader";
 
 export default function LocationPage() {
   const params = useParams();
@@ -34,6 +35,10 @@ export default function LocationPage() {
     .split(",")
     .map((part) => part.trim());
   const [events, setEvents] = useState<Event[]>([]);
+  const [coordinates, setCoordinates] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date()
   );
@@ -42,14 +47,42 @@ export default function LocationPage() {
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
 
   const maxDate = addDays(new Date(), 30);
+  const loader = new Loader({
+    apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    version: "weekly",
+  });
+  useEffect(() => {
+    async function getCoordinates() {
+      const { Geocoder } = await loader.importLibrary("geocoding");
+      const geocoder = new Geocoder();
+
+      try {
+        const response = await geocoder.geocode({
+          address: `${city}, ${state}, ${country}`,
+        });
+
+        if (response.results[0]?.geometry?.location) {
+          const { lat, lng } = response.results[0].geometry.location;
+          setCoordinates({ lat: lat(), lng: lng() });
+        }
+      } catch (error) {
+        console.error("Error geocoding location:", error);
+      }
+    }
+
+    getCoordinates();
+  }, [city, state, country]);
 
   useEffect(() => {
     async function fetchEvents() {
-      const data = await getEvents(city);
-      setEvents(data);
+      if (coordinates) {
+        // const data = await getEvents(coordinates);
+        const data = await getEvents(city);
+        setEvents(data);
+      }
     }
     fetchEvents();
-  }, [city]);
+  }, [coordinates]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -71,6 +104,8 @@ export default function LocationPage() {
       <div className="flex flex-col md:flex-row gap-8">
         <div className="w-full md:w-2/3">
           <Map
+            loader={loader}
+            coordinates={coordinates}
             city={city}
             state={state}
             country={country || "United States"}
