@@ -116,7 +116,10 @@ export default function HomePage() {
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Object.entries(regions).map(([region, cities]) => (
-          <Card key={region}>
+          <Card
+            key={region}
+            className={region !== "United States" ? "relative opacity-50" : ""}
+          >
             <CardHeader>
               <CardTitle>{region}</CardTitle>
             </CardHeader>
@@ -128,6 +131,7 @@ export default function HomePage() {
                       variant="link"
                       className="text-left w-full justify-start p-0 h-auto"
                       asChild
+                      disabled={region !== "United States"}
                     >
                       <Link
                         href={`/${city
@@ -141,6 +145,13 @@ export default function HomePage() {
                 ))}
               </ul>
             </CardContent>
+            {region !== "United States" && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+                <span className="text-2xl font-bold text-primary">
+                  Coming Soon
+                </span>
+              </div>
+            )}
           </Card>
         ))}
       </div>
