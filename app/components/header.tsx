@@ -41,7 +41,7 @@ export function Header() {
             <span className="text-xl font-bold">Open Mic Directory</span>
           </Link>
           <div className="hidden md:flex items-center space-x-4">
-            <NavigationMenu>
+            {/* <NavigationMenu>
               <NavigationMenuList>
                 {Object.entries(regions).map(([region, cities]) => (
                   <NavigationMenuItem key={region}>
@@ -72,8 +72,15 @@ export function Header() {
                   </NavigationMenuItem>
                 ))}
               </NavigationMenuList>
-            </NavigationMenu>
-            <Button variant="default">Post Your Open Mic</Button>
+            </NavigationMenu> */}
+            <div className="relative">
+              <Button variant="default" disabled>
+                Post Your Open Mic
+              </Button>
+              <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
+                Coming Soon
+              </span>
+            </div>
           </div>
         </div>
       </div>
