@@ -3,33 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
-
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/app/components/ui/navigation-menu";
 import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
-
-const regions = {
-  "United States": [
-    ["New York", "Los Angeles", "Chicago", "Austin"],
-    ["Las Vegas", "Philadelphia", "Boston", "Atlanta"],
-    ["Seattle", "Denver", "San Francisco"],
-  ],
-  Canada: [
-    ["Toronto", "Vancouver", "Montreal", "Calgary"],
-    ["Edmonton", "Ottawa", "Victoria", "Halifax"],
-  ],
-  Europe: [
-    ["London", "Paris", "Berlin", "Rome"],
-    ["Madrid", "Amsterdam", "Vienna", "Prague"],
-  ],
-};
 
 export function Header() {
   return (

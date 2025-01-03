@@ -4,7 +4,6 @@ import { Map } from "@/app/components/map";
 import { getEvents, Event } from "@/app/services/events";
 import { useState, useEffect } from "react";
 import { DatePicker } from "@/app/components/ui/date-picker";
-import { Button } from "@/app/components/ui/button";
 import {
   Card,
   CardContent,
@@ -22,7 +21,7 @@ import {
   TableRow,
 } from "@/app/components/ui/table";
 import { Badge } from "@/app/components/ui/badge";
-import { Info, MapPin, Phone, LinkIcon } from "lucide-react";
+import { Info } from "lucide-react";
 import { filterEventsByDate } from "@/app/utils/filterEventsByDate";
 import { EventDetailsModal } from "@/app/components/EventDetailsModal";
 import { Loader } from "@googlemaps/js-api-loader";

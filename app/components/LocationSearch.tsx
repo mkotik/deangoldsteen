@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Input } from "@/app/components/ui/input";
 
 interface LocationSearchProps {
@@ -11,8 +11,6 @@ interface LocationSearchProps {
 }
 
 export function LocationSearch({
-  onPlaceSelect,
-  selectedPlace,
   setSelectedPlace,
   onKeyDown,
 }: LocationSearchProps) {
