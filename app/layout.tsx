@@ -2,8 +2,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/app/components/header";
 import { Footer } from "@/app/components/footer";
-import { Provider } from "react-redux";
-import store from "./redux/store";
 import Script from "next/script";
 import "react-day-picker/style.css";
 
