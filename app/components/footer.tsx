@@ -44,26 +44,10 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <a
-                  href="#"
+                  href="https://www.tiktok.com/@deangoldsteen"
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  Twitter
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Facebook
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Instagram
+                  TikTok
                 </a>
               </li>
             </ul>
