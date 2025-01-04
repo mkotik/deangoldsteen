@@ -3,7 +3,7 @@ import cors from "cors";
 import eventRoutes from "./routes/events";
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 8080;
 
 // CORS configuration
 app.use(
