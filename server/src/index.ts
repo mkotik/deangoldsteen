@@ -16,6 +16,11 @@ app.use(
 
 app.use(express.json());
 
+// Health check - add this before other routes
+app.get("/", (req, res) => {
+  res.send("OK");
+});
+
 // Health check route
 app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
