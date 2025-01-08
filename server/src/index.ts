@@ -18,7 +18,7 @@ app.use(express.json());
 
 // Health check - add this before other routes
 app.get("/", (req, res) => {
-  res.send("OK");
+  res.send("OKKK");
 });
 
 // Health check route
