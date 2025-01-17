@@ -29,7 +29,7 @@ async function scrapeNYCComedyEvents() {
       const output = [];
 
       Array.from(eventElements)
-        .slice(0, 5)
+        .slice(0, 3)
         .forEach((row) => {
           const cells = row.querySelectorAll("td");
           const headerCell = row.querySelector("th");
@@ -46,17 +46,18 @@ async function scrapeNYCComedyEvents() {
 
             currentDate = new Date(fullYear, month - 1, day).toISOString();
           } else if (cells.length >= 2) {
-            const eventDetailsUrl =
-              cells[1]?.querySelector("a")?.getAttribute("href") || "";
-
             const newEvent = {
               date: currentDate,
               time: cells[0]?.textContent?.trim() || "",
               venue: cells[1]?.querySelector("b")?.textContent?.trim() || "",
-              address: cells[1]?.textContent?.trim() || "",
+              address:
+                cells[1]?.textContent
+                  ?.trim()
+                  .replace(/([a-zA-Z])(\d)/, "$1 $2") || "",
               city: "New York",
               state: "NY",
-              detailsUrl: eventDetailsUrl,
+              detailsUrl:
+                cells[1]?.querySelector("a")?.getAttribute("href") || "",
             };
             output.push(newEvent);
           }
@@ -76,20 +77,71 @@ async function scrapeNYCComedyEvents() {
           // Wait for content to load
           await page.waitForSelector("tbody tr", { timeout: 5000 });
 
-          const details = await page.evaluate(() => {
+          const details = await page.evaluate((currentDate) => {
             const detailCells = document.querySelectorAll("tbody tr");
+
+            const name =
+              detailCells[0]
+                ?.querySelector("td")
+                ?.textContent?.split("Event Name:")[1]
+                ?.trim() || "";
+            const phone =
+              detailCells[3]
+                ?.querySelector("td")
+                ?.textContent?.split("Phone:")[1]
+                ?.trim() || "";
+            const frequencyCell =
+              detailCells[4]
+                ?.querySelector("td")
+                ?.textContent?.split("Frequency:")[1]
+                ?.trim() || "";
+
+            let eventType = "singular";
+            if (
+              frequencyCell === "Weekly" ||
+              frequencyCell === "Bi-Weekly" ||
+              frequencyCell === "Monthly"
+            ) {
+              eventType = "recurring";
+            }
+
+            const date = new Date(currentDate);
+            if (isNaN(date.getTime())) {
+              throw new Error("Invalid date");
+            }
+
+            const dayOfWeek = date.getDay();
+            const days = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+            let recurrence_rule = "";
+
+            if (frequencyCell === "Weekly") {
+              recurrence_rule = `FREQ=WEEKLY;BYDAY=${days[dayOfWeek]}`;
+            } else if (frequencyCell === "Bi-Weekly") {
+              recurrence_rule = `FREQ=WEEKLY;INTERVAL=2;BYDAY=${days[dayOfWeek]}`;
+            } else if (frequencyCell === "Monthly") {
+              const lastDay = new Date(
+                date.getFullYear(),
+                date.getMonth() + 1,
+                0
+              );
+              const weekNum = Math.ceil(date.getDate() / 7);
+              const isLastOccurrence = date.getDate() + 7 > lastDay.getDate();
+              const bysetpos = isLastOccurrence ? -1 : weekNum;
+              recurrence_rule = `FREQ=MONTHLY;BYDAY=${days[dayOfWeek]};BYSETPOS=${bysetpos}`;
+            }
+
             return {
-              info: Array.from(detailCells)
-                .map((row) => row.textContent?.trim())
-                .filter(Boolean)
-                .join(" "),
+              name,
+              phone,
+              eventType,
+              frequency: frequencyCell,
+              recurrence_rule,
             };
-          });
+          }, event.date);
 
           events.push({
             ...event,
             ...details,
-            event_type: "singular",
           });
 
           // Go back to main page
@@ -105,7 +157,6 @@ async function scrapeNYCComedyEvents() {
           // Still add the event without details
           events.push({
             ...event,
-            event_type: "singular",
           });
         }
       }
@@ -125,9 +176,10 @@ async function scrapeNYCComedyEvents() {
     fs.writeFileSync(outputPath, JSON.stringify(events, null, 2));
   } catch (error) {
     console.error("Error:", error);
-  } finally {
-    await browser.close();
   }
+  // finally {
+  //   await browser.close();
+  // }
 }
 
 scrapeNYCComedyEvents().catch(console.error);
