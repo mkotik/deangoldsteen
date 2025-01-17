@@ -45,6 +45,8 @@ async function scrapeNYCComedyEvents() {
             const fullYear = 2000 + year;
 
             currentDate = new Date(fullYear, month - 1, day).toISOString();
+
+            // Extract city and state from address
           } else if (cells.length >= 2) {
             const newEvent = {
               date: currentDate,
@@ -54,8 +56,6 @@ async function scrapeNYCComedyEvents() {
                 cells[1]?.textContent
                   ?.trim()
                   .replace(/([a-zA-Z])(\d)/, "$1 $2") || "",
-              city: "New York",
-              state: "NY",
               detailsUrl:
                 cells[1]?.querySelector("a")?.getAttribute("href") || "",
             };
@@ -106,29 +106,61 @@ async function scrapeNYCComedyEvents() {
             }
 
             const date = new Date(currentDate);
-            if (isNaN(date.getTime())) {
-              throw new Error("Invalid date");
-            }
+            const getRecurrenceRule = (date, frequencyCell) => {
+              if (isNaN(date.getTime())) {
+                throw new Error("Invalid date");
+              }
 
-            const dayOfWeek = date.getDay();
-            const days = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
-            let recurrence_rule = "";
+              const dayOfWeek = date.getDay();
+              const days = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+              let recurrence_rule = "";
 
-            if (frequencyCell === "Weekly") {
-              recurrence_rule = `FREQ=WEEKLY;BYDAY=${days[dayOfWeek]}`;
-            } else if (frequencyCell === "Bi-Weekly") {
-              recurrence_rule = `FREQ=WEEKLY;INTERVAL=2;BYDAY=${days[dayOfWeek]}`;
-            } else if (frequencyCell === "Monthly") {
-              const lastDay = new Date(
-                date.getFullYear(),
-                date.getMonth() + 1,
-                0
-              );
-              const weekNum = Math.ceil(date.getDate() / 7);
-              const isLastOccurrence = date.getDate() + 7 > lastDay.getDate();
-              const bysetpos = isLastOccurrence ? -1 : weekNum;
-              recurrence_rule = `FREQ=MONTHLY;BYDAY=${days[dayOfWeek]};BYSETPOS=${bysetpos}`;
-            }
+              if (frequencyCell === "Weekly") {
+                recurrence_rule = `FREQ=WEEKLY;BYDAY=${days[dayOfWeek]}`;
+              } else if (frequencyCell === "Bi-Weekly") {
+                recurrence_rule = `FREQ=WEEKLY;INTERVAL=2;BYDAY=${days[dayOfWeek]}`;
+              } else if (frequencyCell === "Monthly") {
+                const lastDay = new Date(
+                  date.getFullYear(),
+                  date.getMonth() + 1,
+                  0
+                );
+                const weekNum = Math.ceil(date.getDate() / 7);
+                const isLastOccurrence = date.getDate() + 7 > lastDay.getDate();
+                const bysetpos = isLastOccurrence ? -1 : weekNum;
+                recurrence_rule = `FREQ=MONTHLY;BYDAY=${days[dayOfWeek]};BYSETPOS=${bysetpos}`;
+              }
+
+              return recurrence_rule;
+            };
+            const recurrence_rule = getRecurrenceRule(date, frequencyCell);
+
+            const city = "New York";
+            const state = "NY";
+
+            const cost =
+              detailCells[7]
+                ?.querySelector("td")
+                ?.textContent?.split("Cost:")[1]
+                ?.trim() || "";
+
+            const info =
+              detailCells[12]
+                ?.querySelector("td")
+                ?.textContent?.split("Info:")[1]
+                ?.trim() || "";
+
+            const link =
+              detailCells[9]
+                ?.querySelector("td")
+                ?.textContent?.split("Website:")[1]
+                ?.trim() || "";
+
+            const email =
+              detailCells[11]
+                ?.querySelector("td")
+                ?.textContent?.split("Email:")[1]
+                ?.trim() || "";
 
             return {
               name,
@@ -136,6 +168,12 @@ async function scrapeNYCComedyEvents() {
               eventType,
               frequency: frequencyCell,
               recurrence_rule,
+              state,
+              city,
+              cost,
+              info,
+              link,
+              email,
             };
           }, event.date);
 
