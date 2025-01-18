@@ -28,40 +28,38 @@ async function scrapeNYCComedyEvents() {
       let currentDate;
       const output = [];
 
-      Array.from(eventElements)
-        .slice(0, 3)
-        .forEach((row) => {
-          const cells = row.querySelectorAll("td");
-          const headerCell = row.querySelector("th");
+      Array.from(eventElements).forEach((row) => {
+        const cells = row.querySelectorAll("td");
+        const headerCell = row.querySelector("th");
 
-          // Check if this is a date row
-          if (headerCell && cells.length < 2) {
-            const dateText = headerCell.textContent?.trim() || "";
+        // Check if this is a date row
+        if (headerCell && cells.length < 2) {
+          const dateText = headerCell.textContent?.trim() || "";
 
-            if (!dateText) return;
+          if (!dateText) return;
 
-            const [dayName, dateStr] = dateText.split(" ");
-            const [month, day, year] = dateStr.split("/").map(Number);
-            const fullYear = 2000 + year;
+          const [dayName, dateStr] = dateText.split(" ");
+          const [month, day, year] = dateStr.split("/").map(Number);
+          const fullYear = 2000 + year;
 
-            currentDate = new Date(fullYear, month - 1, day).toISOString();
+          currentDate = new Date(fullYear, month - 1, day).toISOString();
 
-            // Extract city and state from address
-          } else if (cells.length >= 2) {
-            const newEvent = {
-              date: currentDate,
-              time: cells[0]?.textContent?.trim() || "",
-              venue: cells[1]?.querySelector("b")?.textContent?.trim() || "",
-              address:
-                cells[1]?.textContent
-                  ?.trim()
-                  .replace(/([a-zA-Z])(\d)/, "$1 $2") || "",
-              detailsUrl:
-                cells[1]?.querySelector("a")?.getAttribute("href") || "",
-            };
-            output.push(newEvent);
-          }
-        });
+          // Extract city and state from address
+        } else if (cells.length >= 2) {
+          const newEvent = {
+            date: currentDate,
+            time: cells[0]?.textContent?.trim() || "",
+            venue: cells[1]?.querySelector("b")?.textContent?.trim() || "",
+            address:
+              cells[1]?.textContent
+                ?.trim()
+                .replace(/([a-zA-Z])(\d)/, "$1 $2") || "",
+            detailsUrl:
+              cells[1]?.querySelector("a")?.getAttribute("href") || "",
+          };
+          output.push(newEvent);
+        }
+      });
       return output;
     });
 
@@ -79,34 +77,61 @@ async function scrapeNYCComedyEvents() {
 
           const details = await page.evaluate((currentDate) => {
             const detailCells = document.querySelectorAll("tbody tr");
+            const eventDetails = {};
 
-            const name =
-              detailCells[0]
-                ?.querySelector("td")
-                ?.textContent?.split("Event Name:")[1]
-                ?.trim() || "";
-            const phone =
-              detailCells[3]
-                ?.querySelector("td")
-                ?.textContent?.split("Phone:")[1]
-                ?.trim() || "";
-            const frequencyCell =
-              detailCells[4]
-                ?.querySelector("td")
-                ?.textContent?.split("Frequency:")[1]
-                ?.trim() || "";
+            Array.from(detailCells).forEach((cell) => {
+              const header = cell?.textContent?.split(": ")[0]?.trim();
+
+              const value = cell?.textContent?.split(": ")[1]?.trim();
+
+              switch (header) {
+                case "Event Name":
+                  eventDetails.name = value;
+                  break;
+                case "Venue Name":
+                  eventDetails.venue = value;
+                  break;
+                case "Address":
+                  eventDetails.address = value;
+                  break;
+                case "Phone":
+                  eventDetails.phone = value;
+                  break;
+                case "Frequency":
+                  eventDetails.frequency = value;
+                  break;
+                case "Day":
+                  eventDetails.day = value;
+                  break;
+                case "Time":
+                  eventDetails.time = value;
+                  break;
+                case "Website":
+                  eventDetails.link = cell.querySelector("a")?.href;
+                  break;
+                case "Email":
+                  eventDetails.email = value;
+                  break;
+                case "Cost":
+                  eventDetails.cost = value;
+                  break;
+                case "Info":
+                  eventDetails.info = value;
+                  break;
+              }
+            });
 
             let eventType = "singular";
             if (
-              frequencyCell === "Weekly" ||
-              frequencyCell === "Bi-Weekly" ||
-              frequencyCell === "Monthly"
+              eventDetails.frequency === "Weekly" ||
+              eventDetails.frequency === "Bi-Weekly" ||
+              eventDetails.frequency === "Monthly"
             ) {
               eventType = "recurring";
             }
 
             const date = new Date(currentDate);
-            const getRecurrenceRule = (date, frequencyCell) => {
+            const getRecurrenceRule = (date, frequency) => {
               if (isNaN(date.getTime())) {
                 throw new Error("Invalid date");
               }
@@ -115,11 +140,11 @@ async function scrapeNYCComedyEvents() {
               const days = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
               let recurrence_rule = "";
 
-              if (frequencyCell === "Weekly") {
+              if (frequency === "Weekly") {
                 recurrence_rule = `FREQ=WEEKLY;BYDAY=${days[dayOfWeek]}`;
-              } else if (frequencyCell === "Bi-Weekly") {
+              } else if (frequency === "Bi-Weekly") {
                 recurrence_rule = `FREQ=WEEKLY;INTERVAL=2;BYDAY=${days[dayOfWeek]}`;
-              } else if (frequencyCell === "Monthly") {
+              } else if (frequency === "Monthly") {
                 const lastDay = new Date(
                   date.getFullYear(),
                   date.getMonth() + 1,
@@ -133,47 +158,20 @@ async function scrapeNYCComedyEvents() {
 
               return recurrence_rule;
             };
-            const recurrence_rule = getRecurrenceRule(date, frequencyCell);
+            const recurrence_rule = getRecurrenceRule(
+              date,
+              eventDetails.frequency
+            );
 
             const city = "New York";
             const state = "NY";
 
-            const cost =
-              detailCells[7]
-                ?.querySelector("td")
-                ?.textContent?.split("Cost:")[1]
-                ?.trim() || "";
-
-            const info =
-              detailCells[12]
-                ?.querySelector("td")
-                ?.textContent?.split("Info:")[1]
-                ?.trim() || "";
-
-            const link =
-              detailCells[9]
-                ?.querySelector("td")
-                ?.textContent?.split("Website:")[1]
-                ?.trim() || "";
-
-            const email =
-              detailCells[11]
-                ?.querySelector("td")
-                ?.textContent?.split("Email:")[1]
-                ?.trim() || "";
-
             return {
-              name,
-              phone,
-              eventType,
-              frequency: frequencyCell,
+              event_type: eventType,
               recurrence_rule,
               state,
               city,
-              cost,
-              info,
-              link,
-              email,
+              ...eventDetails,
             };
           }, event.date);
 
