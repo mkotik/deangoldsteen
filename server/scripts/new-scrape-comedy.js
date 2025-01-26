@@ -3,6 +3,8 @@ const fs = require("fs");
 const path = require("path");
 
 async function scrapeNYCComedyEvents() {
+  const city = "New York";
+  const state = "NY";
   const browser = await puppeteer.launch({
     headless: false,
     protocolTimeout: 30000, // Increase timeout to 30 seconds
@@ -77,7 +79,14 @@ async function scrapeNYCComedyEvents() {
 
           const details = await page.evaluate((currentDate) => {
             const detailCells = document.querySelectorAll("tbody tr");
-            const eventDetails = {};
+            const eventDetails = {
+              email: "",
+              phone: "",
+              frequency: "",
+              cost: "",
+              info: "",
+              link: "",
+            };
 
             Array.from(detailCells).forEach((cell) => {
               const header = cell?.textContent?.split(": ")[0]?.trim();
@@ -205,17 +214,13 @@ async function scrapeNYCComedyEvents() {
     }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const outputPath = path.join(
-      dataDir,
-      `nyc-comedy-events-${timestamp}.json`
-    );
+    const outputPath = path.join(dataDir, `${state}-comedy-events.json`);
     fs.writeFileSync(outputPath, JSON.stringify(events, null, 2));
   } catch (error) {
     console.error("Error:", error);
+  } finally {
+    await browser.close();
   }
-  // finally {
-  //   await browser.close();
-  // }
 }
 
 scrapeNYCComedyEvents().catch(console.error);
