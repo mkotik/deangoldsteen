@@ -62,6 +62,7 @@ async function scrapeNYCComedyEvents() {
           output.push(newEvent);
         }
       });
+
       return output;
     });
 
@@ -91,10 +92,18 @@ async function scrapeNYCComedyEvents() {
             Array.from(detailCells).forEach((cell) => {
               const header = cell?.textContent?.split(": ")[0]?.trim();
 
-              const value = cell?.textContent?.split(": ")[1]?.trim();
+              const valueCell = cell.cloneNode(true);
+              const skipNodes = valueCell.querySelectorAll(".google-anno-skip");
+              skipNodes.forEach((node) => node.remove());
+
+              const value = valueCell?.textContent
+                ?.split(": ")[1]
+                ?.trim()
+                .replace(/\s+/g, " ");
 
               switch (header) {
                 case "Event Name":
+                  console.log("Event Name", value);
                   eventDetails.name = value;
                   break;
                 case "Venue Name":
@@ -199,6 +208,8 @@ async function scrapeNYCComedyEvents() {
             `Error fetching details for event at ${event.venue}:`,
             detailError
           );
+          console.log("Breaking loop");
+          break;
           // Still add the event without details
           events.push({
             ...event,
