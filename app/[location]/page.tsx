@@ -25,6 +25,7 @@ import { Info } from "lucide-react";
 import { filterEventsByDate } from "@/app/utils/filterEventsByDate";
 import { EventDetailsModal } from "@/app/components/EventDetailsModal";
 import { Loader } from "@googlemaps/js-api-loader";
+import { Loader2 } from "lucide-react";
 
 export default function LocationPage() {
   const params = useParams();
@@ -44,6 +45,7 @@ export default function LocationPage() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const capitalizedCity = city
     .split(" ")
@@ -80,9 +82,14 @@ export default function LocationPage() {
   useEffect(() => {
     async function fetchEvents() {
       if (coordinates) {
-        const data = await getEvents(coordinates);
-        // const data = await getEvents(city);
-        setEvents(data);
+        try {
+          const data = await getEvents(coordinates);
+          setEvents(data);
+        } catch (error) {
+          console.error("Error fetching events:", error);
+        } finally {
+          setIsLoading(false);
+        }
       }
     }
     fetchEvents();
@@ -91,7 +98,6 @@ export default function LocationPage() {
   useEffect(() => {
     if (selectedDate) {
       const filteredEvents = filterEventsByDate(events, selectedDate);
-      console.log("Filtered events:", filteredEvents);
       setFilteredEvents(filteredEvents);
     }
   }, [events]);
@@ -102,6 +108,18 @@ export default function LocationPage() {
       setFilteredEvents(filteredEvents);
     }
   }, [selectedDate]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-lg text-gray-600">Loading events...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-4">
