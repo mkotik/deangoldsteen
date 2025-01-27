@@ -2,12 +2,11 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
 
-async function scrapeNYCComedyEvents() {
-  const city = "New York";
-  const state = "NY";
+async function scrapeWYComedyEvents() {
+  const state = "WY";
   const browser = await puppeteer.launch({
-    headless: false,
-    protocolTimeout: 30000, // Increase timeout to 30 seconds
+    headless: true,
+    protocolTimeout: 120000, // Increase timeout to 30 seconds
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
@@ -15,10 +14,13 @@ async function scrapeNYCComedyEvents() {
   const events = [];
 
   try {
-    await page.setDefaultNavigationTimeout(30000); // 30 second timeout for navigation
-    await page.goto("https://badslava.com/new-york-open-mics.php", {
-      waitUntil: "networkidle0", // Wait until network is idle
-    });
+    await page.setDefaultNavigationTimeout(120000); // 30 second timeout for navigation
+    await page.goto(
+      "https://badslava.com/open-mics-state.php?state=WY&type=Comedy",
+      {
+        waitUntil: "networkidle0", // Wait until network is idle
+      }
+    );
 
     // Wait for the table to be visible
     await page.waitForSelector(".table-bordered tbody tr");
@@ -66,13 +68,60 @@ async function scrapeNYCComedyEvents() {
       return output;
     });
 
+    // Read existing events from WY-comedy-events.json
+
+    const eventsFilePath = path.join(
+      __dirname,
+      "data",
+      `${state}-comedy-events.json`
+    );
+    let existingEvents = [];
+    try {
+      const fileContent = await new Promise((resolve, reject) => {
+        fs.readFile(eventsFilePath, "utf8", (err, data) => {
+          if (err) reject(err);
+          else resolve(data);
+        });
+      });
+      existingEvents = JSON.parse(fileContent);
+    } catch (error) {
+      console.log(
+        "No existing events file found or error reading file:",
+        error.message
+      );
+    }
+
+    existingEvents.forEach((event) => {
+      events.push(event);
+    });
+
+    let unfetchedBasicEvents = [];
+
+    if (existingEvents.length > 0) {
+      // Filter out events that already exist
+      unfetchedBasicEvents = basicEvents.filter((basicEvent) => {
+        return !existingEvents.some(
+          (existingEvent) =>
+            existingEvent.date === basicEvent.date &&
+            existingEvent.time === basicEvent.time &&
+            existingEvent.venue === basicEvent.venue
+        );
+      });
+    } else {
+      unfetchedBasicEvents = basicEvents;
+    }
+
+    console.log("existingEvents", existingEvents.length);
+    console.log("basicEvents", basicEvents.length);
+    console.log("unfetchedBasicEvents", unfetchedBasicEvents.length);
+
     // Now fetch additional details for each event
-    for (const event of basicEvents) {
+    for (const event of unfetchedBasicEvents) {
       if (event.detailsUrl) {
         try {
           await page.goto(event.detailsUrl, {
             waitUntil: "networkidle0",
-            timeout: 30000,
+            timeout: 60000,
           });
 
           // Wait for content to load
@@ -181,8 +230,8 @@ async function scrapeNYCComedyEvents() {
               eventDetails.frequency
             );
 
-            const city = "New York";
-            const state = "NY";
+            const city = "";
+            const state = "WY";
 
             return {
               event_type: eventType,
@@ -199,10 +248,10 @@ async function scrapeNYCComedyEvents() {
           });
 
           // Go back to main page
-          await page.goto("https://badslava.com/new-york-open-mics.php", {
-            waitUntil: "networkidle0",
-            timeout: 30000,
-          });
+          // await page.goto("https://badslava.com/new-york-open-mics.php", {
+          //   waitUntil: "networkidle0",
+          //   timeout: 30000,
+          // });
         } catch (detailError) {
           console.error(
             `Error fetching details for event at ${event.venue}:`,
@@ -234,4 +283,4 @@ async function scrapeNYCComedyEvents() {
   }
 }
 
-scrapeNYCComedyEvents().catch(console.error);
+scrapeWYComedyEvents().catch(console.error);

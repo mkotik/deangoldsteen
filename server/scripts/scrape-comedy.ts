@@ -29,7 +29,7 @@ async function scrapeComedyEvents(state: string) {
 
   try {
     await page.goto(
-      `https://web.archive.org/web/20220327092905/http://badslava.com/open-mics-state.php?state=${state}&type=Comedy`
+      `https://web.archive.org/web/20220327092905/http://badslava.com/open-mics-state.php?state=NJ&type=Comedy`
     );
 
     const events = await page.evaluate(() => {
@@ -188,50 +188,7 @@ async function scrapeComedyEvents(state: string) {
   }
 }
 
-const states = [
-  // "CO",
-  // "CT",
-  // "DE",
-  // "FL",
-  // "GA",
-  // "HI",
-  // "ID",
-  // "IL",
-  // "IN",
-  // "IA",
-  // "KS",
-  // "KY",
-  // "LA",
-  // "ME",
-  // "MD",
-  "MA",
-  // "MI",
-  // "MN",
-  // "MS",
-  // "MO",
-  // "MT",
-  // "NE",
-  // "NV",
-  // "NH",
-  // "NM",
-  // "NC",
-  // "ND",
-  // "OH",
-  // "OK",
-  // "OR",
-  // "PA",
-  // "RI",
-  // "SC",
-  // "SD",
-  // "TN",
-  // "UT",
-  // "VT",
-  // "VA",
-  // "WA",
-  // "WV",
-  // "WI",
-  // "WY",
-];
+const states = ["NJ"];
 
 async function scrapeAllStates() {
   for (const state of states) {
