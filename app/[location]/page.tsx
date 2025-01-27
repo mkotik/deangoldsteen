@@ -187,8 +187,17 @@ export default function LocationPage() {
                           ? "secondary"
                           : "default"
                       }
+                      className="relative group"
                     >
-                      {event.cost}
+                      <span
+                        className="block truncate max-w-[80px]"
+                        title={event.cost}
+                      >
+                        {event.cost}
+                      </span>
+                      <span className="absolute z-50 invisible group-hover:visible bg-black text-white p-2 rounded text-sm -top-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                        {event.cost}
+                      </span>
                     </Badge>
                   </TableCell>
                   <TableCell>
