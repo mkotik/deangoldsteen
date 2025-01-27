@@ -189,10 +189,7 @@ export default function LocationPage() {
                       }
                       className="relative group"
                     >
-                      <span
-                        className="block truncate max-w-[80px]"
-                        title={event.cost}
-                      >
+                      <span className="block truncate max-w-[80px]">
                         {event.cost}
                       </span>
                       <span className="absolute z-50 invisible group-hover:visible bg-black text-white p-2 rounded text-sm -top-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
