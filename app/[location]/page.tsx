@@ -91,6 +91,7 @@ export default function LocationPage() {
   useEffect(() => {
     if (selectedDate) {
       const filteredEvents = filterEventsByDate(events, selectedDate);
+      console.log("Filtered events:", filteredEvents);
       setFilteredEvents(filteredEvents);
     }
   }, [events]);
@@ -98,7 +99,6 @@ export default function LocationPage() {
   useEffect(() => {
     if (selectedDate) {
       const filteredEvents = filterEventsByDate(events, selectedDate);
-      console.log("Filtered events:", filteredEvents);
       setFilteredEvents(filteredEvents);
     }
   }, [selectedDate]);

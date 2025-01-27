@@ -40,6 +40,7 @@ export function Map({
 
       events.forEach((event) => {
         if (event.latitude && event.longitude) {
+          console.log(event);
           const marker = new AdvancedMarkerElement({
             map,
             position: {
