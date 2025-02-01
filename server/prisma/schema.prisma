@@ -1,48 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model Event {
-  id                 String    @id @default(uuid())
-  time               String
-  name               String?
-  venue              String?
-  address            String
-  city               String
-  state              String
-  frequency          String?
-  cost               String?
-  info               String?
-  email              String?
-  link               String?
-  phone              String?
-  date               DateTime
-  event_type         EventType
-  recurrence_rule    String?
+  id                  String    @id @default(uuid())
+  time                String
+  name                String?
+  venue               String?
+  address             String
+  city                String?
+  state               String
+  frequency           String?
+  cost                String?
+  info                String?
+  email               String?
+  link                String?
+  phone               String?
+  date                DateTime
+  event_type          EventType
+  recurrence_rule     String?
   recurrence_end_date DateTime?
-  longitude          Float?
-  latitude           Float?
-  reviews            Review[]
-  created_at         DateTime  @default(now())
-  updated_at         DateTime  @updatedAt
+  longitude           Float?
+  latitude            Float?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  reviews             Review[]
 }
 
 model Review {
-  id        String   @id @default(uuid())
-  name      String?
-  date      DateTime
-  content   String
-  rating    Int      @db.SmallInt
-  event     Event    @relation(fields: [eventId], references: [id])
-  eventId   String
+  id         String   @id @default(uuid())
+  name       String?
+  date       DateTime
+  content    String
+  rating     Int      @db.SmallInt
+  eventId    String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-
+  event      Event    @relation(fields: [eventId], references: [id])
 }
 
 enum EventType {
